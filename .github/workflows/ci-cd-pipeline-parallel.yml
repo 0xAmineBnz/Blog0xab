@@ -21,8 +21,7 @@ concurrency:
 # Every job pins `ubuntu-24.04` rather than `ubuntu-latest`. `ubuntu-latest`
 # silently rolls to the next LTS (26.04 images already exist), which swaps the
 # glibc/Node ABI and the whole preinstalled toolchain under a green pipeline.
-# Nothing bumps a `runs-on` label automatically — Dependabot only touches
-# `uses:` — so this is a manual bump when GitHub announces the deprecation.
+# Runner-image upgrades are handled manually when GitHub announces deprecation.
 jobs:
   # Verify dependency signatures and warm the npm cache for the Node jobs.
   setup:
