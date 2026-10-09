@@ -1,14 +1,5 @@
 /**
- * Hand-written content types for the flat-file model (content/articles/*.md).
- *
- * These deliberately keep the names the rest of the app already imports
- * (`ArticleRow`, `ArticleWithRelations`, `CategoryRow`, `TagRow`) so swapping
- * the data layer from Supabase to the filesystem touched no consuming file.
- *
- * Dropped from the old Supabase-generated shape: the `author` relation and
- * `view_count` (the site never rendered author info, and view counting was
- * removed with the database), plus `ProfileRow` / the `Database` generic /
- * newsletter types, whose only consumers were the deleted admin surface.
+ * Content types for the flat-file content model (content/articles/*.md).
  */
 
 /** A single published article, as loaded from a `content/articles/*.md` file. */

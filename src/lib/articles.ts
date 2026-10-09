@@ -8,23 +8,19 @@ import { categoryMeta } from "@/lib/site";
 import type { ArticleWithRelations } from "@/lib/content.types";
 
 /**
- * Flat-file content loader. Replaces the Supabase read path: articles now live
- * as `content/articles/<slug>.md` (YAML front matter + Markdown/HTML body).
+ * Flat-file content loader: articles live as `content/articles/<slug>.md`
+ * (YAML front matter + Markdown/HTML body). The corpus ships in the repo, so
+ * everything is parsed once at module load and served from memory.
  *
- * The corpus is small and ships in the repo, so everything is parsed once at
- * module load and served from memory. Adding a post = add a file + commit.
- *
- * SECURITY: the body is rendered to HTML here, but is NOT trusted output — it
- * still passes through `processArticleHtml()` (sanitize-html allowlist) at
- * render time, exactly as the DB-backed HTML did. This loader only assembles
- * the raw HTML string that pipeline consumes.
+ * SECURITY: the body assembled here is NOT trusted output — it still passes
+ * through `processArticleHtml()` (sanitize-html allowlist) at render time.
+ * This loader only builds the raw HTML string that pipeline consumes.
  */
 
 const ARTICLES_DIR = path.join(process.cwd(), "content", "articles");
 
-// `html: true` lets existing HTML article bodies pass through verbatim so the
-// migrated seed content is lossless; Markdown syntax still renders for new
-// posts authored in plain Markdown.
+// `html: true` lets article bodies authored as raw HTML pass through
+// verbatim; Markdown syntax still renders for plain-Markdown posts.
 const md = new MarkdownIt({ html: true, linkify: false, typographer: false });
 
 interface FrontMatter {
@@ -54,13 +50,11 @@ function loadOne(file: string): ArticleWithRelations | null {
   if (!slug || !fm.title) return null;
   if (fm.published === false) return null;
 
-  // A body that begins with an HTML tag is treated as raw HTML and passed
-  // through verbatim — losslessly, exactly as it was stored in the database.
-  // markdown-it can't be used for this: CommonMark ends an HTML block at the
-  // first blank line, which would shred code blocks that contain blank lines.
-  // Bodies authored in plain Markdown (anything not starting with `<`) are
-  // rendered normally. Either way the result is still sanitized + highlighted
-  // by processArticleHtml() at render time.
+  // A body that begins with an HTML tag is passed through verbatim: CommonMark
+  // ends an HTML block at the first blank line, which would shred code blocks
+  // containing blank lines. Plain-Markdown bodies (anything not starting with
+  // `<`) are rendered normally. Either way the result is still sanitized +
+  // highlighted by processArticleHtml() at render time.
   const body = content.trim();
   const html = body.startsWith("<") ? body : md.render(content);
   const contentText = htmlToText(html);

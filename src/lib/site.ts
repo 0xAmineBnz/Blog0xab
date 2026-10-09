@@ -41,14 +41,11 @@ export const siteConfig = {
   author: {
     name: "AB",
     alias: "0xAB",
-    email: "yferhaten@gmail.com",
     bio: "Cybersecurity student focused on DevSecOps, cloud security and application security. Incoming MSc Cybersecurity, Université de Paris.",
     affiliation: "Université de Paris — MSc Cybersecurity",
   },
   links: {
-    github: "https://github.com/",
-    twitter: "https://twitter.com/",
-    mastodon: "",
+    github: "https://github.com/aminebnz02-cpu",
   },
   // The home page is the post index. `Home` returns there from any deeper page
   // (the masthead logo also links home, but a labelled nav item is discoverable).
