@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/site/section";
 import { SiteSearch } from "@/components/site/site-search";
-import { ThemeToggle } from "@/components/site/theme-toggle";
 import { siteConfig } from "@/lib/site";
 
 const NAV = [...siteConfig.nav];
@@ -34,7 +33,6 @@ export function SiteHeader() {
             </span>
           ))}
           <SiteSearch />
-          <ThemeToggle />
         </nav>
       </Container>
     </header>

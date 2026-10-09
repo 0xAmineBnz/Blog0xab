@@ -138,7 +138,7 @@ src/
 │  ├─ content.ts              # sanitize · highlight · TOC pipeline
 │  ├─ content.types.ts        # hand-written content types
 │  ├─ csp.ts · security-headers.ts   # CSP + hardening headers
-│  └─ site.ts · utils.ts · themes.ts
+│  └─ site.ts · utils.ts
 └─ proxy.ts                   # security headers and CSP nonce
 ```
 
@@ -172,6 +172,5 @@ npm run typecheck  # tsc --noEmit
 ## Customization
 
 Identity, navigation and the category taxonomy live in **`src/lib/site.ts`**.
-The full design system (palette, fonts, terminal motifs, prose styles, the
-custom `highlight.js` theme) lives in **`src/app/globals.css`** — change the
-tokens at the top to re-skin the whole site.
+The Solar design system (colors, fonts, terminal motifs, prose styles, and
+custom `highlight.js` theme) lives in **`src/app/globals.css`**.

@@ -11,11 +11,9 @@ import { processArticleHtml } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 import { formatDate, formatDateLong } from "@/lib/utils";
 
-// The root layout reads the per-request CSP nonce via `headers()`, so no route
-// in this app can be prerendered. Every other page opts out implicitly by
-// awaiting `searchParams`; this one has none, so it must say so explicitly —
-// otherwise Next treats it as ISR and the layout's `headers()` call throws
-// DYNAMIC_SERVER_USAGE at request time (500 on every article).
+// Keep dynamic rendering so the proxy can provide a fresh CSP nonce per
+// response. Other pages opt out implicitly by awaiting `searchParams`; this
+// route has none, so it must say so explicitly.
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({

@@ -2,7 +2,7 @@
 
 /* ============================================================================
    cyberblog — terminal blog design system
-   Black canvas, monospace everything, neon-green headings, bright-blue links.
+   Black canvas, monospace everything, electric-yellow headings, indigo links.
    No cards, gradients, shadows, glassmorphism, animations, or rounded corners.
    A clean retro UNIX / terminal reading surface.
    ========================================================================== */
@@ -16,77 +16,18 @@
   --border: #232323;
   --border-strong: #333333;
 
-  /* neon-green — headings, prompts, list markers, selection */
-  --accent: #b8ff5a;
-  --accent-dim: rgba(184, 255, 90, 0.1);
-  --heading: #b8ff5a;
+  /* electric-yellow — headings, prompts, list markers, selection */
+  --accent: #ffe14d;
+  --accent-dim: rgba(255, 225, 77, 0.12);
+  --heading: #fff07a;
 
-  /* bright-blue — every link */
-  --link: #55b7ff;
+  /* indigo — every link */
+  --link: #8b7bff;
 
   --danger: #ff6b6b;
   --warning: #ffcf6b;
 
   --radius: 0px; /* no rounded corners, anywhere */
-}
-
-/* ============================================================================
-   palettes — live-switchable via [data-theme] on <html>.
-   :root above is the default "matrix" (green phosphor). Every palette shares
-   the SAME neutral near-black canvas, crisp text and hairline borders as
-   matrix — that shared foundation is what gives the strong contrast. Each
-   block below overrides ONLY the two neon identity colors (accent + link, plus
-   their heading/dim variants); background, surface, foreground, muted and
-   borders are inherited from :root. danger/warning are shared too.
-   Each is a complementary-hue pair so accent and link visibly fight on black.
-   Keep these keys in sync with src/lib/themes.ts.
-   ========================================================================== */
-
-/* ice — frost-cyan accent, contrasting coral links */
-[data-theme="ice"] {
-  --accent: #39e0ff;
-  --accent-dim: rgba(57, 224, 255, 0.12);
-  --heading: #7eebff;
-  --link: #ff7a5a;
-}
-
-/* arc — electric-blue accent, contrasting yellow links */
-[data-theme="arc"] {
-  --accent: #3d8bff;
-  --accent-dim: rgba(61, 139, 255, 0.12);
-  --heading: #6fa8ff;
-  --link: #ffd83d;
-}
-
-/* plasma — hot-magenta accent, contrasting cyan links (vaporwave) */
-[data-theme="plasma"] {
-  --accent: #ff3d97;
-  --accent-dim: rgba(255, 61, 151, 0.12);
-  --heading: #ff6fb3;
-  --link: #2fe6e6;
-}
-
-/* solar — electric-yellow accent, contrasting indigo links */
-[data-theme="solar"] {
-  --accent: #ffe14d;
-  --accent-dim: rgba(255, 225, 77, 0.12);
-  --heading: #fff07a;
-  --link: #8b7bff;
-}
-
-/* monochrome */
-[data-theme="mono"] {
-  --background: #0a0a0a;
-  --surface: #141414;
-  --foreground: #d6d6d6;
-  --muted: #8c8c8c;
-  --muted-2: #5c5c5c;
-  --border: #262626;
-  --border-strong: #383838;
-  --accent: #f2f2f2;
-  --accent-dim: rgba(255, 255, 255, 0.08);
-  --heading: #fafafa;
-  --link: #ffffff;
 }
 
 @theme inline {
@@ -166,15 +107,6 @@
   ::selection {
     background: var(--accent);
     color: #07140a;
-  }
-
-  /* glide between palettes instead of hard-cutting */
-  @media (prefers-reduced-motion: no-preference) {
-    body,
-    body * {
-      transition: background-color 0.25s ease, border-color 0.25s ease,
-        color 0.25s ease, fill 0.25s ease;
-    }
   }
 
   /* thin terminal scrollbar */
@@ -431,10 +363,9 @@
 }
 
 /* ============================================================================
-   syntax highlighting — hljs mapped onto the ACTIVE palette.
-   Colors resolve from the theme custom properties (accent = keywords,
-   link = function/class names, warning = numbers/meta) so code blocks follow
-   the selected palette instead of being locked to matrix green/blue.
+   syntax highlighting — hljs mapped onto the Solar color tokens.
+   Colors resolve from the custom properties (accent = keywords,
+   link = function/class names, warning = numbers/meta).
    ========================================================================== */
 
 .hljs {

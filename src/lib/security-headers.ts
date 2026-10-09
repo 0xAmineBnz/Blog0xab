@@ -17,10 +17,9 @@ const securityHeaders = [
 /**
  * Stamps a per-request CSP nonce and applies the static hardening headers.
  *
- * The nonce is forwarded to the app two ways: `x-nonce` so the root layout can
- * tag its inline theme script, and the request-side `Content-Security-Policy`
- * header so Next.js auto-nonces its own bootstrap scripts. The same CSP is set
- * on every response so the browser enforces it.
+ * The request-side `Content-Security-Policy` header lets Next.js nonce its
+ * bootstrap scripts. The same CSP is set on every response so the browser
+ * enforces it.
  */
 export function applySecurityHeaders(request: NextRequest): NextResponse {
   // 122 bits of randomness per request; hex is a valid CSP nonce charset.
@@ -28,7 +27,6 @@ export function applySecurityHeaders(request: NextRequest): NextResponse {
   const csp = buildCsp(nonce, process.env.NODE_ENV !== "production");
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("content-security-policy", csp);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });

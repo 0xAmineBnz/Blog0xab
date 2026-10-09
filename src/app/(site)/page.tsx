@@ -9,9 +9,9 @@ import {
   countPublishedArticles,
 } from "@/lib/queries";
 
-// Dynamic, like every public page: the root layout stamps a per-request CSP
-// nonce via `headers()`, so no HTML here can be prerendered. Freshness comes
-// from the tag-invalidated query cache in `lib/queries.ts`, not from ISR.
+// Keep dynamic rendering so the proxy can provide a fresh CSP nonce per
+// response. Freshness comes from the tag-invalidated query cache in
+// `lib/queries.ts`, not from ISR.
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 10;
 

@@ -12,11 +12,10 @@ import {
 } from "@/lib/queries";
 import { categoryMeta } from "@/lib/site";
 
-// See `app/(site)/page.tsx` — dynamic render, cached queries.
+// See `app/(site)/page.tsx` — dynamic render for the per-response CSP nonce.
 //
 // `generateStaticParams` was removed with the ISR config: it fed a prerender
-// that could never succeed through the nonce-stamping root layout. Next was
-// silently bailing these pages out to dynamic rendering on every build.
+// that could never succeed with the per-response CSP nonce.
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 10;
 

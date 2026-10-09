@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
-import { headers } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/lib/site";
-import { themeInitScript } from "@/lib/themes";
 import "./globals.css";
 
 const jetbrains = JetBrains_Mono({
@@ -65,32 +63,12 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Per-request nonce set by the proxy; ties the inline theme script to
-  // the strict, `unsafe-inline`-free `script-src`.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html
-      lang="en"
-      className={jetbrains.variable}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={jetbrains.variable}>
       <body className="min-h-dvh antialiased">
-        {/*
-          `suppressHydrationWarning`: once CSP is enforced the browser blanks the
-          `nonce` content attribute in the DOM (the real value lives in an
-          internal slot) so it can't be exfiltrated by CSS attribute selectors.
-          React reads the DOM during hydration, sees "" where it rendered the
-          nonce, and reports a mismatch. The script has already run by then, so
-          there is nothing to reconcile.
-        */}
-        <script
-          nonce={nonce}
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
         <a
           href="#main"
           className="no-underline-link sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:border focus:border-accent focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-accent"
