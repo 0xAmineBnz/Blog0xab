@@ -1,0 +1,498 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   cyberblog — terminal blog design system
+   Black canvas, monospace everything, neon-green headings, bright-blue links.
+   No cards, gradients, shadows, glassmorphism, animations, or rounded corners.
+   A clean retro UNIX / terminal reading surface.
+   ========================================================================== */
+
+:root {
+  --background: #0a0a0a;
+  --surface: #0f0f0f; /* faint inset (code/inline) — never a "card" */
+  --foreground: #d4d4d4;
+  --muted: #8a8a8a;
+  --muted-2: #5e5e5e;
+  --border: #232323;
+  --border-strong: #333333;
+
+  /* neon-green — headings, prompts, list markers, selection */
+  --accent: #b8ff5a;
+  --accent-dim: rgba(184, 255, 90, 0.1);
+  --heading: #b8ff5a;
+
+  /* bright-blue — every link */
+  --link: #55b7ff;
+
+  --danger: #ff6b6b;
+  --warning: #ffcf6b;
+
+  --radius: 0px; /* no rounded corners, anywhere */
+}
+
+/* ============================================================================
+   palettes — live-switchable via [data-theme] on <html>.
+   :root above is the default "matrix" (green phosphor). Every palette shares
+   the SAME neutral near-black canvas, crisp text and hairline borders as
+   matrix — that shared foundation is what gives the strong contrast. Each
+   block below overrides ONLY the two neon identity colors (accent + link, plus
+   their heading/dim variants); background, surface, foreground, muted and
+   borders are inherited from :root. danger/warning are shared too.
+   Each is a complementary-hue pair so accent and link visibly fight on black.
+   Keep these keys in sync with src/lib/themes.ts.
+   ========================================================================== */
+
+/* ice — frost-cyan accent, contrasting coral links */
+[data-theme="ice"] {
+  --accent: #39e0ff;
+  --accent-dim: rgba(57, 224, 255, 0.12);
+  --heading: #7eebff;
+  --link: #ff7a5a;
+}
+
+/* arc — electric-blue accent, contrasting yellow links */
+[data-theme="arc"] {
+  --accent: #3d8bff;
+  --accent-dim: rgba(61, 139, 255, 0.12);
+  --heading: #6fa8ff;
+  --link: #ffd83d;
+}
+
+/* plasma — hot-magenta accent, contrasting cyan links (vaporwave) */
+[data-theme="plasma"] {
+  --accent: #ff3d97;
+  --accent-dim: rgba(255, 61, 151, 0.12);
+  --heading: #ff6fb3;
+  --link: #2fe6e6;
+}
+
+/* solar — electric-yellow accent, contrasting indigo links */
+[data-theme="solar"] {
+  --accent: #ffe14d;
+  --accent-dim: rgba(255, 225, 77, 0.12);
+  --heading: #fff07a;
+  --link: #8b7bff;
+}
+
+/* monochrome */
+[data-theme="mono"] {
+  --background: #0a0a0a;
+  --surface: #141414;
+  --foreground: #d6d6d6;
+  --muted: #8c8c8c;
+  --muted-2: #5c5c5c;
+  --border: #262626;
+  --border-strong: #383838;
+  --accent: #f2f2f2;
+  --accent-dim: rgba(255, 255, 255, 0.08);
+  --heading: #fafafa;
+  --link: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-heading: var(--heading);
+  --color-link: var(--link);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+
+  /* shadcn-compatible aliases so admin/ui primitives still resolve */
+  --color-surface-2: var(--surface);
+  --color-elevated: var(--surface);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--accent);
+  --color-primary-foreground: #07140a;
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted);
+  --color-accent-foreground: #07140a;
+  --color-destructive: var(--danger);
+  --color-input: var(--border);
+  --color-ring: var(--accent);
+
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", "Fira Code",
+    "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+}
+
+/* ============================================================================
+   base
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+    -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #07140a;
+  }
+
+  /* glide between palettes instead of hard-cutting */
+  @media (prefers-reduced-motion: no-preference) {
+    body,
+    body * {
+      transition: background-color 0.25s ease, border-color 0.25s ease,
+        color 0.25s ease, fill 0.25s ease;
+    }
+  }
+
+  /* thin terminal scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* every link: bright blue, underlined */
+  a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--link) 45%, transparent);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  a:hover {
+    text-decoration-color: var(--link);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--heading);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+}
+
+/* ============================================================================
+   utilities
+   ========================================================================== */
+
+/* dotted hairline divider between sections / list items (UNIX `----` vibe) */
+.rule-dashed {
+  height: 0;
+  width: 100%;
+  border: 0;
+  border-top: 1px dashed var(--border-strong);
+}
+
+/* a non-link styled like terminal chrome — opt out of the global blue underline */
+.no-underline-link {
+  text-decoration: none;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* faint engineering grid — used only by the internal /admin login, never the blog */
+.bg-grid {
+  background-image: linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border) 60%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border) 60%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 40px 40px;
+}
+.bg-grid-fade {
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* ============================================================================
+   article prose (.prose-cyber) — rendered, sanitized article HTML
+   ========================================================================== */
+
+.prose-cyber {
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+
+.prose-cyber > * + * {
+  margin-top: 1.35em;
+}
+
+.prose-cyber h2,
+.prose-cyber h3,
+.prose-cyber h4 {
+  color: var(--heading);
+  scroll-margin-top: 2rem;
+}
+
+.prose-cyber h2 {
+  font-size: 1.5rem;
+  margin-top: 2.4em;
+  margin-bottom: 0.1em;
+}
+.prose-cyber h3 {
+  font-size: 1.2rem;
+  margin-top: 2em;
+}
+.prose-cyber h4 {
+  font-size: 1.02rem;
+  margin-top: 1.8em;
+}
+
+.prose-cyber p {
+  color: var(--foreground);
+}
+
+.prose-cyber a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--link) 45%, transparent);
+  text-underline-offset: 3px;
+}
+.prose-cyber a:hover {
+  text-decoration-color: var(--link);
+}
+
+.prose-cyber strong {
+  color: #f2f2f2;
+  font-weight: 700;
+}
+
+.prose-cyber ul,
+.prose-cyber ol {
+  padding-left: 1.4em;
+}
+.prose-cyber li {
+  margin-top: 0.35em;
+}
+.prose-cyber ul > li::marker {
+  color: var(--accent);
+}
+.prose-cyber ol > li::marker {
+  color: var(--muted);
+}
+
+.prose-cyber ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0.2em;
+}
+.prose-cyber ul[data-type="taskList"] li {
+  display: flex;
+  gap: 0.6em;
+  align-items: flex-start;
+}
+.prose-cyber ul[data-type="taskList"] input {
+  margin-top: 0.4em;
+  accent-color: var(--accent);
+}
+
+.prose-cyber blockquote {
+  border-left: 2px solid var(--accent);
+  padding: 0.1em 0 0.1em 1.1em;
+  color: var(--muted);
+}
+.prose-cyber blockquote p {
+  color: var(--muted);
+}
+
+/* inline code */
+.prose-cyber :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.1em 0.4em;
+  color: color-mix(in oklab, var(--accent) 78%, var(--foreground));
+  word-break: break-word;
+}
+
+.prose-cyber hr {
+  border: 0;
+  border-top: 1px dashed var(--border-strong);
+  margin: 2.4em 0;
+}
+
+.prose-cyber img {
+  border: 1px solid var(--border);
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.prose-cyber figure figcaption {
+  margin-top: 0.6em;
+  font-size: 0.8rem;
+  color: var(--muted-2);
+  text-align: center;
+}
+
+.prose-cyber table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  display: block;
+  overflow-x: auto;
+}
+.prose-cyber th,
+.prose-cyber td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+.prose-cyber th {
+  color: var(--heading);
+  font-weight: 700;
+}
+
+/* ============================================================================
+   code blocks
+   ========================================================================== */
+
+.prose-cyber pre,
+.code-block pre {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  tab-size: 2;
+}
+.prose-cyber pre code,
+.code-block pre code {
+  font-family: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--foreground);
+  font-size: inherit;
+}
+
+/* ============================================================================
+   syntax highlighting — hljs mapped onto the ACTIVE palette.
+   Colors resolve from the theme custom properties (accent = keywords,
+   link = function/class names, warning = numbers/meta) so code blocks follow
+   the selected palette instead of being locked to matrix green/blue.
+   ========================================================================== */
+
+.hljs {
+  color: var(--foreground);
+  background: transparent;
+}
+.hljs-comment,
+.hljs-quote {
+  color: var(--muted);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-doctag,
+.hljs-name {
+  color: var(--accent);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-meta-string {
+  color: color-mix(in oklab, var(--accent) 55%, var(--foreground));
+}
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-meta,
+.hljs-link {
+  color: var(--warning);
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-built_in,
+.hljs-attr {
+  color: var(--link);
+}
+.hljs-type,
+.hljs-class .hljs-title,
+.hljs-title.class_ {
+  color: color-mix(in oklab, var(--link) 65%, #ffffff);
+}
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute,
+.hljs-tag {
+  color: var(--foreground);
+}
+.hljs-params {
+  color: var(--muted);
+}
+.hljs-deletion {
+  color: var(--danger);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}

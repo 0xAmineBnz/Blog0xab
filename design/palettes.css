@@ -1,0 +1,104 @@
+/* ============================================================================
+   cyberblog — alternative color palettes
+   ----------------------------------------------------------------------------
+   Same design approach as the current theme: a dark canvas, ONE dominant accent
+   hue (headings · prompts · list markers · selection), ONE link hue, a neutral
+   muted gray scale, plus danger/warning. To try one, replace the token values
+   in the `:root` block of src/app/globals.css (lines ~10–31) with a block below.
+   Only the raw values change — every component reads through these variables.
+   ============================================================================ */
+
+
+/* ── 0 · neon green — CURRENT (kept here for reference) ───────────────────── */
+:root {
+  --background: #0a0a0a;
+  --surface: #0f0f0f;
+  --foreground: #d4d4d4;
+  --muted: #8a8a8a;
+  --muted-2: #5e5e5e;
+  --border: #232323;
+  --border-strong: #333333;
+  --accent: #b8ff5a;
+  --accent-dim: rgba(184, 255, 90, 0.1);
+  --heading: #b8ff5a;
+  --link: #55b7ff;
+  --danger: #ff6b6b;
+  --warning: #ffcf6b;
+  --radius: 0px;
+}
+
+
+/* ── 1 · amber phosphor — warm retro CRT, amber accent + cool sky links ───── */
+:root {
+  --background: #0a0806;
+  --surface: #130d07;
+  --foreground: #ddcfb0;
+  --muted: #9c8b66;
+  --muted-2: #6a5c40;
+  --border: #2a2013;
+  --border-strong: #3b2e1b;
+  --accent: #ffb454;
+  --accent-dim: rgba(255, 180, 84, 0.1);
+  --heading: #ffb454;
+  --link: #5fb8d6;
+  --danger: #ff6f5e;
+  --warning: #ffd27a;
+  --radius: 0px;
+}
+
+
+/* ── 2 · ice — cool blue console, cyan accent + indigo links ──────────────── */
+:root {
+  --background: #070a0c;
+  --surface: #0c1116;
+  --foreground: #ccd8e0;
+  --muted: #7e8c96;
+  --muted-2: #4f5a63;
+  --border: #1b2228;
+  --border-strong: #2a333b;
+  --accent: #4fd6ff;
+  --accent-dim: rgba(79, 214, 255, 0.1);
+  --heading: #4fd6ff;
+  --link: #9d8bff;
+  --danger: #ff6b8a;
+  --warning: #ffcf6b;
+  --radius: 0px;
+}
+
+
+/* ── 3 · synthwave — neon magenta accent + electric cyan links ────────────── */
+:root {
+  --background: #0b0711;
+  --surface: #130b1b;
+  --foreground: #e2d6ea;
+  --muted: #97889f;
+  --muted-2: #645869;
+  --border: #261a30;
+  --border-strong: #392843;
+  --accent: #ff5cf0;
+  --accent-dim: rgba(255, 92, 240, 0.1);
+  --heading: #ff5cf0;
+  --link: #4fe3ff;
+  --danger: #ff5a6e;
+  --warning: #ffc861;
+  --radius: 0px;
+}
+
+
+/* ── 4 · mono matrix — restrained single-hue green, lighter-green links ───── */
+:root {
+  --background: #060806;
+  --surface: #0b0f0b;
+  --foreground: #b6cbae;
+  --muted: #6f8267;
+  --muted-2: #46523f;
+  --border: #172016;
+  --border-strong: #263123;
+  --accent: #57f78e;
+  --accent-dim: rgba(87, 247, 142, 0.1);
+  --heading: #57f78e;
+  --link: #a6e3ad;
+  --danger: #ff7a6b;
+  --warning: #e6d56b;
+  --radius: 0px;
+}

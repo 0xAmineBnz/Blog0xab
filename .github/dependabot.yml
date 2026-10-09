@@ -1,0 +1,61 @@
+# Dependabot opens PRs for dependency updates. It is the *remediation* half of
+# SCA: Snyk tells you a CVE is present, Dependabot produces the diff
+# that removes it. Running one without the other means a pipeline that reports
+# the same finding every Monday forever.
+#
+# IMPORTANT — Dependabot PRs and secrets: a workflow triggered by a Dependabot
+# PR runs with a read-only GITHUB_TOKEN and CANNOT read normal repo secrets.
+# `${{ secrets.SNYK_TOKEN }}` resolves to an empty string, the snyk-sca job
+# fails, ci-gate fails, and every Dependabot PR is unmergeable. The fix is to
+# add the same token under Settings → Secrets and variables → Dependabot (a
+# separate store from Actions secrets); it is then available on these runs.
+version: 2
+
+updates:
+  # Application dependencies. Security advisories are picked up here regardless
+  # of `schedule` — GitHub raises security updates as soon as an advisory lands.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 10
+    # Update the range in package.json, not just the lockfile pin. Without
+    # this, a caret range like ^16.2.11 gets a lockfile-only bump and
+    # package.json drifts out of sync with what actually ships.
+    versioning-strategy: increase
+    labels: [dependencies, npm]
+    groups:
+      # One PR per group instead of one per package: a React 19 patch that
+      # lands as five separate PRs means five full pipeline runs and five
+      # chances to merge a partial upgrade. Security updates are deliberately
+      # NOT grouped — they stay individual so each is reviewable on its own.
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      next:
+        patterns: ["next", "eslint-config-next", "@next/*"]
+      radix:
+        patterns: ["@radix-ui/*"]
+      dev-minor-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  # The workflow's own supply chain. Every `uses:` in this repo is SHA-pinned,
+  # which is correct for security and terrible for freshness — a pinned SHA
+  # never updates itself. Dependabot reads the `#v6`-style trailing comment,
+  # bumps the SHA, and rewrites the comment, so pinning stays maintainable.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    labels: [dependencies, github-actions]
+    groups:
+      actions:
+        patterns: ["*"]
+        update-types: [minor, patch]
