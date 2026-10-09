@@ -36,12 +36,9 @@ jobs:
       with:
         persist-credentials: false
 
-    # `cache: npm` caches ~/.npm (npm's content-addressed tarball store), not
-    # node_modules. node_modules is machine-specific — native addons compiled
-    # against a given glibc/Node ABI, symlinks, platform-conditional optional
-    # deps — so restoring it across runner images is unsound. ~/.npm is just
-    # verified tarballs, portable anywhere. setup-node keys it on the platform,
-    # arch and lockfile hash, and saves it in a post-job step.
+    # `cache: npm` caches ~/.npm (verified tarballs), not node_modules —
+    # node_modules is machine-specific (glibc/Node ABI, symlinks, optional
+    # deps) and unsound to restore across runner images.
     #
     # This job runs first and every other Node job `needs:` it, so its post-job
     # save warms the cache before the parallel jobs restore it.
@@ -111,10 +108,9 @@ jobs:
     - name: Install semgrep
       run: pip install semgrep==1.172.0
 
-    # NOTE: --config=auto fetches rules from semgrep.dev at run time, so this
-    # step is deliberately non-hermetic: the rule set moves without a diff here.
-    # That is what we want from a scanner (see the weekly `schedule:` above),
-    # but it means a green run is not reproducible. Never gate an artifact on it.
+    # --config=auto fetches rules from semgrep.dev at run time: non-hermetic by
+    # design (the rule set moves without a diff here), so a green run is not
+    # reproducible — the weekly `schedule:` exists to rescan against new rules.
     - name: Run semgrep scan
       run: semgrep scan --config=auto --error --severity=ERROR --sarif-output=semgrep-results.sarif
 
@@ -146,12 +142,8 @@ jobs:
         node-version: '24.21.0'
         cache: 'npm'
 
-    # Unconditional. `npm ci` is authoritative — it builds node_modules from the
-    # lockfile, verifying each tarball's integrity hash; ~/.npm only decides
-    # whether the bytes come off disk or the network. A cold cache is slower,
-    # never different. This replaces a restore + `if: cache-hit != 'true'`
-    # fallback, a branch that only existed because node_modules was the cached
-    # unit and therefore might arrive wrong or not at all.
+    # Unconditional: `npm ci` builds node_modules from the lockfile, verifying
+    # each tarball's integrity hash — a cold cache is slower, never different.
     - name: Install dependencies
       run: npm ci
 
@@ -225,21 +217,16 @@ jobs:
 
 
 
-  # The single required status check. Branch protection (see
-  # .github/rulesets/main.json) names THIS job and nothing else, so the job
-  # list above can be renamed, split or reordered without an admin editing repo
-  # settings — the fan-in is versioned here, visible in the diff.
+  # The single required status check (named by .github/rulesets/main.json), so
+  # the job list above can be renamed, split or reordered without an admin
+  # editing repo settings — the fan-in is versioned here, visible in the diff.
   #
-  # `if: always()` is what makes it a gate rather than decoration. Without it
-  # the job inherits the default `success()` condition and is SKIPPED the
-  # moment an upstream job fails — and a required check that never reports
-  # leaves the PR "expected — waiting for status", which is precisely the state
-  # people click past. So: always run, then assert on the collected results.
-  #
-  # `skipped` counts as failure here on purpose. No upstream job carries an
-  # `if:`, so a skip means the run was cancelled or a job never started, not a
-  # deliberate no-op. If you later add a conditional job, relax this to
-  # `.result == "success" or .result == "skipped"` for that job only.
+  # `if: always()` is required: the default `success()` condition would skip
+  # this job whenever an upstream job fails, and a required check that never
+  # reports leaves PRs stuck on "expected — waiting for status". A `skipped`
+  # result failing here is deliberate: no upstream job carries an `if:`, so a
+  # skip means the run was cancelled or a job never started, not a no-op. If a
+  # conditional job is added later, relax this for that job only.
   ci-gate:
     if: always()
     needs: [setup, secrets-scan, semgrep-sast, snyk-sca, build]

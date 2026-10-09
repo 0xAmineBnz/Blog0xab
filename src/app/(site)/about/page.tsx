@@ -60,7 +60,6 @@ export default function AboutPage() {
           >
             github
           </Link>
-          <Link href={`mailto:${siteConfig.author.email}`}>email</Link>
         </p>
       </section>
     </Container>

@@ -14,9 +14,6 @@ import type {
  * every query below is an in-memory filter over that array — no database, no
  * cross-request cache needed. React `cache()` is kept only to dedupe repeated
  * calls within a single render pass.
- *
- * The exported surface (names, signatures, return types) is unchanged from the
- * former Supabase implementation so no consuming page/component was touched.
  */
 
 export interface ArticleQuery {

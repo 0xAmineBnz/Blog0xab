@@ -20,7 +20,6 @@ export function SiteFooter() {
             >
               github
             </Link>
-            <Link href={`mailto:${siteConfig.author.email}`}>email</Link>
           </nav>
         </div>
       </Container>
