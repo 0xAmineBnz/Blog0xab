@@ -45,7 +45,7 @@ export const siteConfig = {
     affiliation: "Université de Paris — MSc Cybersecurity",
   },
   links: {
-    github: "https://github.com/aminebnz02-cpu",
+    github: "https://github.com/0xAmineBnz",
   },
   // The home page is the post index. `Home` returns there from any deeper page
   // (the masthead logo also links home, but a labelled nav item is discoverable).
