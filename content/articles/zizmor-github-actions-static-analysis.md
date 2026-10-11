@@ -1,5 +1,5 @@
 ---
-title: "Zizmor: stop writing your own GitHub Actions linter"
+title: "A first look at zizmor: static analysis for GitHub Actions"
 slug: zizmor-github-actions-static-analysis
 excerpt: "I was about to write custom audit rules for my GitHub Actions pipelines when I thought to myself that someone has probably already built something similar."
 category: devsecops
@@ -17,9 +17,9 @@ It parses your workflow (and action) files, applies its audits, and reports find
 
 - **location** — down to the file, line and column,
 - **severity** — `informational`, `low`, `medium` or `high`,
-- **confidence**
+- **confidence** — how sure zizmor is that it's a real problem, not just a false alarm.
 
-One thing worth internalizing early: **zizmor never runs your workflows or their scripts.** It's purely static. It reads the YAML, understands the structure , jobs, steps, permissions, `${{ }}` expansions and looks for structural weaknesses like over-privileged jobs or script injection sinks. If your danger lives in a shell script called at runtime, zizmor won't see it (more on that at the end).
+One thing worth internalizing early: **zizmor never runs your workflows or their scripts.** It's purely static. It reads the YAML, understands the structure — jobs, steps, permissions, `${{ }}` expansions — and looks for structural weaknesses like over-privileged jobs or script injection sinks. If your danger lives in a shell script called at runtime, zizmor won't see it (more on that at the end).
 
 ## What it actually looks for
 
