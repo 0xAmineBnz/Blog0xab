@@ -37,13 +37,12 @@ Each finding links to its own documentation page explaining the attack scenario 
 It is a dedicated job, centralized in the Security tab like every other scanner, it's always important for artifacts :
 
 ```yaml
-# centralized in the Security tab like every other scanner here.
+# gates the pipeline: fails the job on any finding.
 zizmor:
   runs-on: ubuntu-24.04
   timeout-minutes: 10
   permissions:
     contents: read
-    security-events: write # SARIF upload to code scanning (Security tab).
 
   steps:
   - name: Checkout code
@@ -57,11 +56,38 @@ zizmor:
       # Pin the zizmor CLI: the action's default (`latest`) moves on
       # upstream releases, breaking reproducibility of a green run.
       version: 1.30.1
+      # Gate instead of report: fail on findings rather than uploading
+      # SARIF (which would leave the job green regardless of results).
+      advanced-security: false
 ```
 
 The action's default (`advanced-security: true`) uploads the findings as SARIF to code scanning, so alerts land in **Security → Code scanning**,  deduplicated across runs and triaged in one place, right next to the Snyk, Semgrep and CodeQL results, that's mostly the case of the current project.
 
-One subtlety worth knowing before you ship it: with `advanced-security: true` (the default) zizmor **reports** but never gates — the job stays green and the alerts accumulate in the Security tab. With `advanced-security: false` the action skips the upload and instead fails the job on findings, using zizmor's exit codes (`13` for a highest-severity medium, `14` for high). Depending on how strict you want the pipeline, you'll want one or the other in production — or both, as separate jobs.
+One subtlety worth knowing before you ship it: with `advanced-security: true` (the default) zizmor **reports** but never gates — the job stays green and the alerts accumulate in the Security tab. With `advanced-security: false` the action skips the upload and instead fails the job on findings, using zizmor's exit codes (`13` for a highest-severity medium, `14` for high).
+
+The two modes don't cancel each other out — they're just two different jobs. That's how I run it in production: a reporting job feeds the Security tab next to the other scanners, and a separate gate job fails the pipeline on findings:
+
+```yaml
+  zizmor-report:            # reporting: uploads SARIF, never gates
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+    - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 #v0.6.4
+      with:
+        version: 1.30.1
+
+  zizmor:                   # gating: no upload, fails on findings
+    permissions:
+      contents: read
+    steps:
+    - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 #v0.6.4
+      with:
+        version: 1.30.1
+        advanced-security: false
+```
+
+The trade-off is running the audit twice — it's a fast scan, and the report/gate separation means you keep one pane of glass for triage *and* a check that actually turns red.
 
 A small detail: the action's default zizmor version is `latest`, which quietly moves on upstream releases. Pinning the CLI version keeps a run reproducible, you'll see this a lot in my workflows, that assures hermeticity, that's a principle for another article.
 
@@ -82,26 +108,11 @@ rules:
 
 There's also a `personas` knob (`regular` / `pedantic` / `auditor`) that scales how noisy the analysis gets. The default `regular` persona is tuned for high-signal CI use; `auditor` flags everything, including likely false positives, useful when you want to be quite strict.
 
-## What it actually caught on day one
+## What it can actually catch
 
-I could stop here and you'd get the idea — but the tool is much more convincing when it catches *you*. So here are two real findings from the first run of my own pipeline, reproduced verbatim.
+Here are two real findings from the first run of my own pipeline, i've left some deliberate issues for the demo.
 
-The first one is the humbling kind. Every action in my workflow was SHA-pinned with a version comment, which I honestly considered a finished, best-practice setup. Zizmor disagreed:
-
-```text
-warning[ref-version-mismatch]: action's hash pin has mismatched or missing version comment
-  --> ./.github/workflows/ci-cd-pipeline-parallel.yml:46:74
-   |
-46 |       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 #v7
-   |             -----------------------------------------------------------  ^^ tag points to commit 949feb2413d6
-   |             |
-   |             is pointed to by tag v7.0.0
-   |
-   = note: audit confidence → High
-   = note: this finding has an auto-fix
-```
-
-What it caught: the `#v7` comment claims the hash resolves to `v7`, but the `v7` tag now points to a *different* commit — the maintainers published a patch release, my pin stayed on the old one, and the comment quietly became a lie. Not exploitable by itself, but it means the `#v7` annotation you rely on when reviewing a diff is describing an action that no longer exists. This is exactly the class of "structural drift" that no runtime scanner will ever see, because at runtime the pin still works fine.
+Missing SHA pin, potentially leading to Supply Chain attacks — and before anyone shrugs that off as theoretical: when `tj-actions/changed-files` was compromised in March 2025 (CVE-2025-30066), a large chunk of the 23,000+ affected repositories were hit through exactly this pattern, mutable tag references that an attacker could re-point. [Trivy's own CI was among the victims](https://www.wiz.io/blog/github-action-tj-actions-changed-files-supply-chain-attack-cve-2025-30066) — a security scanner, taken down by an unpinned action.
 
 The second one is more direct — a plain tag pin that slipped into the file:
 
@@ -116,7 +127,7 @@ error[unpinned-uses]: unpinned action reference
    = note: this finding has an auto-fix
 ```
 
-Note the wording: *(required by blanket policy)* — zizmor treats hash pinning as a repo-wide policy, not a suggestion. And since this was the highest-severity finding, the job itself failed with exit code `14`, the code the tool reserves for "at least one high-severity finding". The severity scale isn't just decoration; it's what turns the linter into a gate.
+Note the wording: *(required by blanket policy)* — zizmor treats hash pinning as a repo-wide policy, not a suggestion. The job itself failed with exit code `14`, the code the tool reserves for "at least one high-severity finding".
 
 Both findings ship with auto-fixes (`--fix` applies the safe ones in place), and both link to a documentation page explaining the attack scenario and the recommended resolution.
 
@@ -126,6 +137,10 @@ Both findings ship with auto-fixes (`--fix` applies the safe ones in place), and
 
 It does a better job paired with another SAST, configured with proper rules for the scripts.
 
-## Closing thoughts
+## References
 
-The pitch, really, is this: I had a pipeline I considered hardened — pinned actions, least-privilege jobs, SARIF everywhere — and zizmor still found nine things worth fixing in its first two minutes, without ever running a single line of my code. The next time you're about to write custom linting rules for your workflows, run `zizmor .` first. Someone has probably already built it, and they built it well.
+- [zizmor documentation](https://docs.zizmor.sh/) — usage, configuration and operating modes,
+- [zizmor audit rules](https://docs.zizmor.sh/audits/) — the full catalog of audits, each with the attack scenario and the fix,
+- [zizmorcore/zizmor-action](https://github.com/zizmorcore/zizmor-action) — the GitHub Action used in this post,
+- [CISA advisory — Supply Chain Compromise of tj-actions/changed-files (CVE-2025-30066)](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066-and-reviewdogaction),
+- [Wiz — GitHub Action tj-actions/changed-files supply chain attack](https://www.wiz.io/blog/github-action-tj-actions-changed-files-supply-chain-attack-cve-2025-30066) — the incident writeup behind the Trivy reference.
