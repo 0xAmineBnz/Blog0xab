@@ -223,5 +223,6 @@ the ruleset ensures nothing merges without a passing `ci-gate`.
 
 ## License
 
-Content (articles) is the author's — ask before republishing. Code is MIT;
-audit it before trusting it.
+Unless otherwise noted, all code, articles, and other content in this repository
+are © 2026 aminebnz02-cpu. All rights reserved. No license is granted to copy,
+modify, or redistribute them.

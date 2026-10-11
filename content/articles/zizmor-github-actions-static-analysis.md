@@ -9,7 +9,7 @@ publishedAt: 2026-10-11
 ---
 
 
-In a nutshell, zizmor is a static analysis tool — in the same family as semgrep, Snyk or Trivy — but built with a single focus: **GitHub Actions**. So instead of running and maintaining your own custom static rules, zizmor ships a solid, curated set of audits to help secure your pipelines out of the box.
+In a nutshell, zizmor is a static analysis tool in the same family as semgrep, Snyk or Trivy,  but built with a single focus on **GitHub Actions**. So instead of running and maintaining your own custom static rules, zizmor ships a solid, curated set of audits to help secure your pipelines out of the box.
 
 ## How it works
 
@@ -19,7 +19,7 @@ It parses your workflow (and action) files, applies its audits, and reports find
 - **severity** — `informational`, `low`, `medium` or `high`,
 - **confidence** — how sure zizmor is that it's a real problem, not just a false alarm.
 
-One thing worth internalizing early: **zizmor never runs your workflows or their scripts.** It's purely static. It reads the YAML, understands the structure — jobs, steps, permissions, `${{ }}` expansions — and looks for structural weaknesses like over-privileged jobs or script injection sinks. If your danger lives in a shell script called at runtime, zizmor won't see it (more on that at the end).
+One thing worth internalizing early: **zizmor never runs your workflows or their scripts.** It's purely static. It reads the YAML, understands the structure, jobs, steps, permissions, `${{ }}` expansions and looks for structural weaknesses like over-privileged jobs or script injection sinks. If your danger lives in a shell script called at runtime, zizmor won't see it (more on that at the end).
 
 ## What it actually looks for
 
@@ -61,11 +61,11 @@ zizmor:
       advanced-security: false
 ```
 
-The action's default (`advanced-security: true`) uploads the findings as SARIF to code scanning, so alerts land in **Security → Code scanning**,  deduplicated across runs and triaged in one place, right next to the Snyk, Semgrep and CodeQL results, that's mostly the case of the current project.
+The action's default (`advanced-security: true`) uploads the findings as SARIF to code scanning, so alerts land in **Security → Code scanning**,  deduplicated across runs and triaged in one place, right next to other findings, that's mostly the case of the current project.
 
-One subtlety worth knowing before you ship it: with `advanced-security: true` (the default) zizmor **reports** but never gates — the job stays green and the alerts accumulate in the Security tab. With `advanced-security: false` the action skips the upload and instead fails the job on findings, using zizmor's exit codes (`13` for a highest-severity medium, `14` for high).
+One subtlety worth knowing, with `advanced-security: true` (the default) zizmor **reports** but never actually gates, the job stays green and the alerts accumulate in the Security tab. With `advanced-security: false` the action skips the upload and instead fails the job on findings, using zizmor's exit codes (`13` for a highest-severity medium, `14` for high).
 
-The two modes don't cancel each other out — they're just two different jobs. That's how I run it in production: a reporting job feeds the Security tab next to the other scanners, and a separate gate job fails the pipeline on findings:
+The two modes don't cancel each other out, they're just two different jobs. You can simply run both.
 
 ```yaml
   zizmor-report:            # reporting: uploads SARIF, never gates
@@ -87,7 +87,7 @@ The two modes don't cancel each other out — they're just two different jobs. T
         advanced-security: false
 ```
 
-The trade-off is running the audit twice — it's a fast scan, and the report/gate separation means you keep one pane of glass for triage *and* a check that actually turns red.
+The trade-off is running the audit twice , it's a fast scan, and the report/gate separation means you keep one pane of glass for triage *and* a check that actually gates.
 
 A small detail: the action's default zizmor version is `latest`, which quietly moves on upstream releases. Pinning the CLI version keeps a run reproducible, you'll see this a lot in my workflows, that assures hermeticity, that's a principle for another article.
 
