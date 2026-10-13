@@ -213,8 +213,8 @@ src/
 
 ## Deploy
 
-**Vercel:** import the repo, set `NEXT_PUBLIC_SITE_URL` to the production
-domain, deploy. Deploys happen on merge to `main` via the GitHub integration;
+**Vercel:** import the repo, set `NEXT_PUBLIC_SITE_URL` to
+`https://0xab-sec.dev`, and deploy. Deploys happen on merge to `main` via the GitHub integration;
 the ruleset ensures nothing merges without a passing `ci-gate`.
 
 **Any Node.js host:** use Node.js 24, install with `npm ci
