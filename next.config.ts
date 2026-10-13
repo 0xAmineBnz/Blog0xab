@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Emit a minimal server and dependency tree for the production container.
+  output: "standalone",
   // Strip the `X-Powered-By: Next.js` response header — it only advertises the
   // framework (and hints at its version range) to anyone probing the app.
   poweredByHeader: false,

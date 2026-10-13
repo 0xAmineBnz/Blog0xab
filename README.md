@@ -221,6 +221,27 @@ the ruleset ensures nothing merges without a passing `ci-gate`.
 --legacy-peer-deps`, build with `npm run build`, run with `npm start`, and set
 `NEXT_PUBLIC_SITE_URL` in the host's environment.
 
+**Docker:** the repository also includes a production-oriented multi-stage
+`Dockerfile`. Its Node Alpine base is pinned by tag and digest, dependencies
+are installed from the lockfile, and the final image runs the standalone
+server as the non-root `node` user. Build and run it with:
+
+```bash
+docker build --tag blog0xab:local .
+docker run --rm --publish 3000:3000 \
+  --read-only --tmpfs /tmp:rw,noexec,nosuid,nodev \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --env NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
+  blog0xab:local
+```
+
+`compose.yaml` is committed for repeatable local or single-host operation. It
+applies the same runtime restrictions, health check, restart policy, and
+non-root image defaults. Compose is not a production orchestrator: enterprise
+deployments should promote the pinned image through a registry and enforce
+resource limits, network policy, image signing/verification, and secrets
+management in the target platform.
+
 ## License
 
 Unless otherwise noted, all code, articles, and other content in this repository
