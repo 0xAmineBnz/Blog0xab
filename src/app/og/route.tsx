@@ -6,21 +6,27 @@ export const runtime = "edge";
 // Satori has no system-font access: the JetBrains Mono TTFs must be handed to
 // ImageResponse explicitly or the card silently renders in the bundled
 // Noto Sans instead of the blog's monospace.
-const FONT_URLS = [
-  "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Regular.ttf",
-  "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Bold.ttf",
+const FONTS = [
+  {
+    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Regular.ttf",
+    weight: 400,
+  },
+  {
+    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Bold.ttf",
+    weight: 700,
+  },
 ] as const;
 
 let fontsPromise: Promise<
-  { name: string; data: ArrayBuffer; weight: number; style: "normal" }[]
+  { name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[]
 > | undefined;
 
 function loadFonts() {
   return (fontsPromise ??= Promise.all(
-    FONT_URLS.map(async (url, i) => ({
+    FONTS.map(async ({ url, weight }) => ({
       name: "JetBrains Mono",
       data: await fetch(url).then((res) => res.arrayBuffer()),
-      weight: i === 0 ? 400 : 700,
+      weight,
       style: "normal" as const,
     })),
   ));
