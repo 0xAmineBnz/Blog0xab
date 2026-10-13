@@ -29,7 +29,7 @@ export async function generateMetadata({
   const description = article.excerpt ?? siteConfig.description;
   const ogImage =
     article.cover_image ??
-    `${siteConfig.url}/og?title=${encodeURIComponent(article.title)}&cat=${encodeURIComponent(article.category?.code ?? "")}`;
+    `${siteConfig.url}/og?v=2&title=${encodeURIComponent(article.title)}&cat=${encodeURIComponent(article.category?.code ?? "")}`;
 
   return {
     title: article.title,
