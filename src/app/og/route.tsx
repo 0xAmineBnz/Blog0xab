@@ -3,10 +3,35 @@ import { siteConfig } from "@/lib/site";
 
 export const runtime = "edge";
 
+// Satori has no system-font access: the JetBrains Mono TTFs must be handed to
+// ImageResponse explicitly or the card silently renders in the bundled
+// Noto Sans instead of the blog's monospace.
+const FONT_URLS = [
+  "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Regular.ttf",
+  "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Bold.ttf",
+] as const;
+
+let fontsPromise: Promise<
+  { name: string; data: ArrayBuffer; weight: number; style: "normal" }[]
+> | undefined;
+
+function loadFonts() {
+  return (fontsPromise ??= Promise.all(
+    FONT_URLS.map(async (url, i) => ({
+      name: "JetBrains Mono",
+      data: await fetch(url).then((res) => res.arrayBuffer()),
+      weight: i === 0 ? 400 : 700,
+      style: "normal" as const,
+    })),
+  ));
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const title = (searchParams.get("title") ?? siteConfig.title).slice(0, 120);
-  const cat = (searchParams.get("cat") ?? "").slice(0, 8);
+  const cat = (searchParams.get("cat") ?? "").slice(0, 32);
+  const excerpt = (searchParams.get("excerpt") ?? "").slice(0, 180);
+  const fonts = await loadFonts();
 
   return new ImageResponse(
     (
@@ -16,78 +41,62 @@ export async function GET(request: Request) {
           height: "630px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
           backgroundColor: "#0a0a0a",
-          padding: "64px",
-          fontFamily: "monospace",
+          color: "#d4d4d4",
+          padding: "58px 76px",
+          fontFamily: '"JetBrains Mono", monospace',
         }}
       >
-        {/* top: identity */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ display: "flex", color: "#ffe14d", fontSize: "30px" }}>
-            ./
-          </div>
-          <div style={{ display: "flex", color: "#eaeaea", fontSize: "30px", fontWeight: 700 }}>
-            {siteConfig.name}
-          </div>
-          <div style={{ display: "flex", color: "#6b7280", fontSize: "22px", marginLeft: "8px" }}>
-            {siteConfig.role}
-          </div>
+        <div style={{ display: "flex", color: "#fff07a", fontSize: "34px", fontWeight: 700 }}>
+          ./{siteConfig.name}
         </div>
-
-        {/* middle: title */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          {cat ? (
-            <div
-              style={{
-                display: "flex",
-                alignSelf: "flex-start",
-                border: "1px solid rgba(255,225,77,0.4)",
-                backgroundColor: "rgba(255,225,77,0.12)",
-                color: "#ffe14d",
-                fontSize: "24px",
-                padding: "6px 16px",
-                borderRadius: "0px",
-              }}
-            >
-              {cat}
-            </div>
-          ) : null}
-          <div
-            style={{
-              display: "flex",
-              color: "#fff07a",
-              fontSize: title.length > 64 ? "56px" : "72px",
-              fontWeight: 800,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {title}
-          </div>
+        <div style={{ display: "flex", marginTop: "12px", color: "#8a8a8a", fontSize: "20px" }}>
+          {"// "}
+          {siteConfig.roles.join("  ·  ")}
         </div>
-
-        {/* bottom: prompt line */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ display: "flex", color: "#ffe14d", fontSize: "24px" }}>$</div>
-          <div style={{ display: "flex", color: "#8a8a8a", fontSize: "24px" }}>
-            cat ./research --devsecops --cloud-security
+        <div style={{ display: "flex", marginTop: "22px", color: "#5e5e5e", fontSize: "19px" }}>
+          [<span style={{ color: "#8b7bff" }}>Home</span>]{"  "}
+          [<span style={{ color: "#8b7bff" }}>About</span>]
+        </div>
+        <div style={{ display: "flex", marginTop: "24px", borderTop: "1px dashed #333333" }} />
+        <div style={{ display: "flex", marginTop: "24px", color: "#5e5e5e", fontSize: "18px" }}>
+          ~/blog / <span style={{ color: "#8a8a8a" }}>{cat.toLowerCase()}</span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            marginTop: "16px",
+            color: "#fff07a",
+            fontSize: title.length > 64 ? "42px" : "50px",
+            fontWeight: 700,
+            lineHeight: 1.15,
+          }}
+        >
+          {title}
+        </div>
+        {excerpt ? (
+          <div style={{ display: "flex", marginTop: "14px", color: "#8a8a8a", fontSize: "19px", lineHeight: 1.35 }}>
+            {excerpt}
           </div>
-          <div
-            style={{
-              display: "flex",
-              width: "12px",
-              height: "26px",
-              backgroundColor: "#ffe14d",
-              marginLeft: "4px",
-            }}
-          />
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            marginTop: "auto",
+            borderTop: "1px dashed #333333",
+            paddingTop: "20px",
+            color: "#8a8a8a",
+            fontSize: "18px",
+          }}
+        >
+          <span style={{ color: "#ffe14d" }}>$ </span> cat ./research
         </div>
       </div>
     ),
     {
       width: 1200,
       height: 630,
+      fonts,
       // The card is a pure function of (title, cat), so it never needs to be
       // re-rendered for the same inputs. Cache aggressively so a CDN or
       // platform crawler can absorb repeat hits instead of re-running Satori.
