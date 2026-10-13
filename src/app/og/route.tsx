@@ -18,16 +18,13 @@ export async function GET(request: Request) {
           flexDirection: "column",
           justifyContent: "space-between",
           backgroundColor: "#0a0a0a",
-          backgroundImage:
-            "linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
           padding: "64px",
           fontFamily: "monospace",
         }}
       >
         {/* top: identity */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ display: "flex", color: "#b8ff5a", fontSize: "30px" }}>
+          <div style={{ display: "flex", color: "#ffe14d", fontSize: "30px" }}>
             ./
           </div>
           <div style={{ display: "flex", color: "#eaeaea", fontSize: "30px", fontWeight: 700 }}>
@@ -45,9 +42,9 @@ export async function GET(request: Request) {
               style={{
                 display: "flex",
                 alignSelf: "flex-start",
-                border: "1px solid rgba(184,255,90,0.4)",
-                backgroundColor: "rgba(184,255,90,0.1)",
-                color: "#b8ff5a",
+                border: "1px solid rgba(255,225,77,0.4)",
+                backgroundColor: "rgba(255,225,77,0.12)",
+                color: "#ffe14d",
                 fontSize: "24px",
                 padding: "6px 16px",
                 borderRadius: "0px",
@@ -59,7 +56,7 @@ export async function GET(request: Request) {
           <div
             style={{
               display: "flex",
-              color: "#f5f5f5",
+              color: "#fff07a",
               fontSize: title.length > 64 ? "56px" : "72px",
               fontWeight: 800,
               lineHeight: 1.05,
@@ -72,8 +69,8 @@ export async function GET(request: Request) {
 
         {/* bottom: prompt line */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ display: "flex", color: "#b8ff5a", fontSize: "24px" }}>$</div>
-          <div style={{ display: "flex", color: "#9ca3af", fontSize: "24px" }}>
+          <div style={{ display: "flex", color: "#ffe14d", fontSize: "24px" }}>$</div>
+          <div style={{ display: "flex", color: "#8a8a8a", fontSize: "24px" }}>
             cat ./research --devsecops --cloud-security
           </div>
           <div
@@ -81,7 +78,7 @@ export async function GET(request: Request) {
               display: "flex",
               width: "12px",
               height: "26px",
-              backgroundColor: "#b8ff5a",
+              backgroundColor: "#ffe14d",
               marginLeft: "4px",
             }}
           />
