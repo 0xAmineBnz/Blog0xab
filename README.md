@@ -18,11 +18,13 @@ flowchart LR
     B --> E[SCA<br/>Snyk]
     B --> F[build<br/>typecheck · lint · SBOM]
     B --> G[CodeQL<br/>SAST]
-    A --> H[workflow audit<br/>zizmor]
-    C & D & E & F & G & H --> I[ci-gate<br/>all must pass]
+    B --> H[container build<br/>Docker image + Trivy]
+    A --> I[workflow audit<br/>zizmor]
+    H --> J[image publish<br/>GHCR · non-PR only]
+    C & D & E & F & G & H & I & J --> K[ci-gate<br/>all must pass]
 
     style B fill:#0f1a12,stroke:#00FF88
-    style I fill:#0f1a12,stroke:#00FF88
+    style K fill:#0f1a12,stroke:#00FF88
 ```
 
 | Stage | Tool | What it enforces |
@@ -35,6 +37,9 @@ flowchart LR
 | Workflow audit | zizmor | Self-audit of this repo's Actions: injection sinks, over-privileged jobs, unpinned actions |
 | Build gate | tsc + ESLint + `next build` | Types, lint, and a working production build |
 | SBOM | Syft (CycloneDX) | Production dependencies only, per build |
+| Container build | Docker Buildx | Production image (the repo's `Dockerfile`) built on every run, GHA-cached |
+| Image scanning | Trivy | Fails the job on any HIGH/CRITICAL vulnerability in the built image; SARIF to Code Scanning |
+| Image publish | GHCR | The only job with `packages: write` pushes the exact bytes Trivy scanned; skipped entirely on PRs |
 | Centralized reporting | SARIF → Code Scanning | All scanner outputs land in the repo's Security tab |
 
 Design notes:
@@ -57,6 +62,11 @@ Design notes:
 - **Snyk policy.** `--fail-on=upgradable` means a known vulnerability with no
   upstream fix does not block the build. That is a documented policy choice:
   unfixable findings are tracked in Code Scanning, not used to wedge CI.
+- **The image cannot bypass the scan.** `docker-image` builds and scans the
+  production image holding no registry credentials; the artifact is published
+  by `docker-publish` — the only job with `packages: write` — which loads and
+  pushes the exact bytes Trivy gated. PR builds get build + scan with no
+  publish path at all, and the `latest` tag is applied only off `main`.
 - **Deployment is delegated to Vercel's GitHub integration.** Vercel deploys
   on merge to `main` — not after Actions completes. `main` is protected by
   the ruleset, which requires `ci-gate` before merging and blocks direct
@@ -224,7 +234,10 @@ the ruleset ensures nothing merges without a passing `ci-gate`.
 **Docker:** the repository also includes a production-oriented multi-stage
 `Dockerfile`. Its Node Alpine base is pinned by tag and digest, dependencies
 are installed from the lockfile, and the final image runs the standalone
-server as the non-root `node` user. Build and run it with:
+server as the non-root `node` user. CI builds this image on every run, gates
+it on Trivy, and publishes it to GHCR (`ghcr.io/<owner>/<repo>:sha-<sha>`,
+plus `:latest` off `main`) after the scan passes. Build and run it locally
+with:
 
 ```bash
 docker build --tag blog0xab:local .
