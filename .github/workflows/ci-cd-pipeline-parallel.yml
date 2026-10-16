@@ -397,4 +397,4 @@ jobs:
         RESULTS: ${{ toJSON(needs) }}
       run: |
         echo "$RESULTS" | jq -r 'to_entries[] | "\(.value.result)\t\(.key)"'
-        echo "$RESULTS" | jq -e 'all(.[]; .result == "success" or (.key == "docker-publish" and .result == "skipped"))' > /dev/null
+        echo "$RESULTS" | jq -e 'all(to_entries[]; .value.result == "success" or (.key == "docker-publish" and .value.result == "skipped"))' > /dev/null
