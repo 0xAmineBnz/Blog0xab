@@ -2,6 +2,7 @@ FROM node:24-alpine3.24@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba
 
 WORKDIR /app
 RUN apk add --no-cache 'zlib=1.3.2-r1'
+RUN npm install --global --no-audit --no-fund 'npm@11.21.1'
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -9,6 +10,7 @@ FROM node:24-alpine3.24@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba
 
 WORKDIR /app
 RUN apk add --no-cache 'zlib=1.3.2-r1'
+RUN npm install --global --no-audit --no-fund 'npm@11.21.1'
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json next.config.ts tsconfig.json ./
 COPY postcss.config.mjs eslint.config.mjs ./
@@ -21,6 +23,7 @@ FROM node:24-alpine3.24@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba
 
 WORKDIR /app
 RUN apk add --no-cache 'zlib=1.3.2-r1'
+RUN npm install --global --no-audit --no-fund 'npm@11.21.1'
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0 \
